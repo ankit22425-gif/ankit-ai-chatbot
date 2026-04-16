@@ -30,7 +30,7 @@ if prompt := st.chat_input("Kaise help karu?"):
     # 5. Gemini se jawab mangna
     with st.chat_message("assistant"):
         try:
-            model = genai.GenerativeModel('gemini-1.5-flash')
+            model = genai.GenerativeModel('gemini-pro')
             response = model.generate_content(prompt)
             
             bot_response = response.text
