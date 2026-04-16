@@ -1,30 +1,42 @@
 import streamlit as st
-from openai import OpenAI
+import google.generativeai as genai
 
-st.title("My Personal AI Chatbot")
+# Page ki setting
+st.set_page_config(page_title="My AI Chatbot", layout="centered")
+st.title("🤖 My Personal AI Chatbot (Gemini)")
 
-# Sidebar mein API key mangne ka option (Ya fir code mein hide karein)
-client = OpenAI(api_key="YOUR_API_KEY")
+# 1. Gemini API Key configure karein (Streamlit Secrets se)
+try:
+    genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+except:
+    st.error("Bhai, Gemini API Key nahi mili! Streamlit Secrets check karo.")
 
+# 2. Chat history maintain karne ke liye
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Purani chat dikhane ke liye
+# 3. Purani baatein (Messages) screen par dikhane ke liye
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# User input
+# 4. Chat input box (User ke liye)
 if prompt := st.chat_input("Kaise help karu?"):
+    # User ka message session mein save karo
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
+    # 5. Gemini se jawab mangna
     with st.chat_message("assistant"):
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=st.session_state.messages
-        )
-        reply = response.choices[0].message.content
-        st.markdown(reply)
-    st.session_state.messages.append({"role": "assistant", "content": reply})
+        try:
+            model = genai.GenerativeModel('gemini-1.5-flash')
+            response = model.generate_content(prompt)
+            
+            bot_response = response.text
+            st.markdown(bot_response)
+            
+            # Bot ka jawab bhi save karo
+            st.session_state.messages.append({"role": "assistant", "content": bot_response})
+        except Exception as e:
+            st.error(f"Error aa raha hai bhai: {e}")
