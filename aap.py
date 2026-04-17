@@ -1,51 +1,61 @@
 import streamlit as st
 import google.generativeai as genai
 
-# Page setup
+# Page configuration
 st.set_page_config(page_title="My AI Chatbot", page_icon="🤖")
 st.title("My Personal AI Chatbot")
 
-# 1. Secrets se API Key uthana
+# 1. Secrets se Key check karna
 if "GEMINI_API_KEY" not in st.secrets:
-    st.error("Bhai, Streamlit Secrets mein 'GEMINI_API_KEY' nahi mili. Pehle Settings mein ja kar add karo!")
+    st.error("Secret 'GEMINI_API_KEY' nahi mili! Streamlit Settings > Secrets mein check karein.")
     st.stop()
 
 api_key = st.secrets["GEMINI_API_KEY"]
 
 try:
-    # 2. Gemini ko configure karna
-    genai.configure(api_key=api_key)
-    
-    # 3. Model select karna (Stable version)
-    # Agar ye error de, toh 'gemini-1.5-flash' ko 'gemini-pro' se badal dena
+    # 2. AQ wali key ke liye 'rest' transport zaroori hai
+    genai.configure(api_key=api_key, transport='rest')
+
+    # 3. Model initialization
     model = genai.GenerativeModel('gemini-1.5-flash')
 
-    # Chat history initialize karna
+    # Session state for chat history
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
-    # Purani baatein screen par dikhana
+    # Display chat history
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    # 4. User se sawal lena
+    # 4. User input and Response
     if prompt := st.chat_input("Kuch puchiye..."):
-        # User ka message dikhao
+        # User message
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
 
-        # AI ka jawab generate karna
+        # Assistant response
         with st.chat_message("assistant"):
             try:
+                # Direct generation
                 response = model.generate_content(prompt)
-                full_response = response.text
-                st.markdown(full_response)
-                st.session_state.messages.append({"role": "assistant", "content": full_response})
+                
+                if response.text:
+                    st.markdown(response.text)
+                    st.session_state.messages.append({"role": "assistant", "content": response.text})
+                else:
+                    st.warning("Model ne koi jawab nahi diya. Key ya Safety settings check karein.")
+            
             except Exception as e:
-                st.error(f"Response error: {e}")
-                st.info("Tip: Agar 'AQ' wali key se error aa raha hai, toh Google AI Studio se 'AIzaSy' wali key try karein.")
+                # Detailed Error for debugging
+                st.error(f"Technical Error: {e}")
+                if "404" in str(e):
+                    st.info("Tip: Model name match nahi kar raha. Requirements.txt check karein.")
+                elif "401" in str(e):
+                    st.info("Tip: API Key invalid hai. Nayi key try karein.")
 
 except Exception as e:
     st.error(f"Setup Error: {e}")
+    
+   
