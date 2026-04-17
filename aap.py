@@ -24,7 +24,7 @@ if prompt := st.chat_input("Kaise help karu?"):
     with st.chat_message("assistant"):
         try:
             # Yahan humne model ka naam 'gemini-pro' kar diya hai jo sabse stable hai
-            model = genai.GenerativeModel('gemini-pro') 
+            model = genai.GenerativeModel('gemini-1.5-flash') 
             response = model.generate_content(prompt)
             st.markdown(response.text)
             st.session_state.messages.append({"role": "assistant", "content": response.text})
