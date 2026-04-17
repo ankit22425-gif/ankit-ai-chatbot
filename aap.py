@@ -1,43 +1,27 @@
 import streamlit as st
 import google.generativeai as genai
 
-st.set_page_config(page_title="My AI Chatbot", layout="centered")
-st.title("🤖 My Personal AI Chatbot (Gemini)")
+st.title("My Personal AI Chatbot")
 
-# 1. API Configuration
-try:
-        genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-except Exception as e:
-    st.error(f"Error :{e}")
+# 1. Sabse pehle key check karte hain
+api_key = st.secrets.get("GEMINI_API_KEY")
 
-# 2. Chat History
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
-
-# 3. Chat Logic
-if prompt := st.chat_input("Can I help you?"):
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
-
-    with st.chat_message("assistant"):
-        try:
-            # Sabse stable model use kar rahe hain
-            model = genai.GenerativeModel('gemini-1.5-flash') 
-            response = model.generate_content(prompt)
+if not api_key:
+    st.error("Bhai, Streamlit ko aapki Key nahi mil rahi. Secrets check karo.")
+else:
+    try:
+        # 2. Key configure karein
+        genai.configure(api_key=api_key)
+        
+        # 3. Naya model use karein (1.5-flash sabse fast hai)
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        
+        user_input = st.text_input("Kuch puchiye:", key="input")
+        
+        if user_input:
+            response = model.generate_content(user_input)
+            st.write(response.text)
             
-            st.markdown(response.text)
-            st.session_state.messages.append({"role": "assistant", "content": response.text})
-        except Exception as e:
-            # Agar gemini-pro na chale toh flash try karega
-            try:
-                model = genai.GenerativeModel('gemini-1.5-flash')
-                response = model.generate_content(prompt)
-                st.markdown(response.text)
-            except:
-                st.error("Bhai, Google ke models connect nahi ho rahe. Ek baar API Key dobara check karo.")
-          
+    except Exception as e:
+        # Ye line humein asli wajah batayegi
+        st.error(f"Asli Technical Error ye hai: {e}")
