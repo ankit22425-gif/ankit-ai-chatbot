@@ -7,8 +7,8 @@ st.title("🤖 My Personal AI Chatbot (Gemini)")
 # 1. API Configuration
 try:
         genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-except:
-    st.error("Bhai, Secrets mein GEMINI_API_KEY nahi mili!")
+except Exception as e:
+    st.error(f"asli error ye hai :{e})
 
 # 2. Chat History
 if "messages" not in st.session_state:
