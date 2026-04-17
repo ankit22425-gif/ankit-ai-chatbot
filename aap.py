@@ -27,7 +27,7 @@ if prompt := st.chat_input("Can I help you?"):
     with st.chat_message("assistant"):
         try:
             # Sabse stable model use kar rahe hain
-            model = genai.GenerativeModel('gemini-pro') 
+            model = genai.GenerativeModel('gemini-1.5-flash') 
             response = model.generate_content(prompt)
             
             st.markdown(response.text)
