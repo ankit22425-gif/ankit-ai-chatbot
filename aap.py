@@ -14,7 +14,7 @@ else:
         genai.configure(api_key=api_key)
         
         # 3. Naya model use karein (1.5-flash sabse fast hai)
-        model = genai.GenerativeModel('gemini-pro')
+        model = genai.GenerativeModel('gemini-1.5-flash-latest')
         
         user_input = st.text_input("Kuch puchiye:", key="input")
         
